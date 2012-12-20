@@ -89,12 +89,14 @@ install_full_rpm: install_base_rpm install_full
 datadog_agent_base_rpm: clean install_base_rpm
 	FPM_EDITOR="echo '' >>" \
 $(FPM_BUILD) -t rpm \
--n datadog-agent-base \
+-n datadog-agent-legacy \
 -d "python(abi) >= 2.4" \
 -d "python-uuid" \
 -d "sysstat" \
 -d "pexpect" \
---replaces "datadog-agent-lib < $(VERSION)" \
+--conflicts "datadog-agent <= $(VERSION)" \
+--replaces "datadog-agent-lib < 3.5.0" \
+--replaces "datadog-agent-base < 3.5.0" \
 --pre-install datadog-agent-base-rpm/pre_install \
 --post-install datadog-agent-base-rpm/post_install \
 --pre-uninstall datadog-agent-base-rpm/pre_uninstall \
@@ -109,9 +111,9 @@ $(FPM_BUILD) -t rpm \
 -d "supervisor >= 3.0" \
 -d "sysstat" \
 -d "pexpect" \
---conflicts "datadog-agent < $(VERSION)" \
---replaces "datadog-agent-base < 3.4.0" \
---replaces "datadog-agent-lib  < $(VERSION)" \
+--conflicts "datadog-agent-legacy <= $(VERSION)" \
+--replaces  "datadog-agent-base < 3.5.0" \
+--replaces  "datadog-agent-lib  < 3.5.0" \
 --pre-install	    datadog-agent-rpm/preinst \
 --post-install	    datadog-agent-rpm/postinst \
 --pre-uninstall	    datadog-agent-rpm/prerm \
