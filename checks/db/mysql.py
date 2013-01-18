@@ -215,30 +215,11 @@ class MySql(Check):
                 self._collect_scalar("mysqlConnections", "SHOW STATUS LIKE 'Connections'")
     
                 self.logger.debug("MySQL version %s" % self.mysqlVersion)
-                # show global status was introduced in 5.0.2
-                # some patch version numbers contain letters (e.g. 5.0.51a)
-                # so let's be careful when we compute the version number
-                greater_502 = False
-                try:
-                    major = int(self.mysqlVersion[0])
-                    patchlevel = int(re.match(r"([0-9]+)", self.mysqlVersion[2]).group(1))
-                    
-                    if major > 5 or  major == 5 and patchlevel >= 2: 
-                        greater_502 = True
-                    
-                except:
-                    self.logger.exception("Cannot compute mysql version from %s, assuming older than 5.0.2" % self.mysqlVersion)
     
-                if greater_502:
-                    self._collect_scalar("mysqlCreatedTmpDiskTables", "SHOW GLOBAL STATUS LIKE 'Created_tmp_disk_tables'")
-                    self._collect_scalar("mysqlSlowQueries",          "SHOW GLOBAL STATUS LIKE 'Slow_queries'")
-                    self._collect_scalar("mysqlQuestions",            "SHOW GLOBAL STATUS LIKE 'Questions'")
-                    self._collect_scalar("mysqlQueries",              "SHOW GLOBAL STATUS LIKE 'Queries'")
-                else:
-                    self._collect_scalar("mysqlCreatedTmpDiskTables", "SHOW STATUS LIKE 'Created_tmp_disk_tables'")
-                    self._collect_scalar("mysqlSlowQueries",          "SHOW STATUS LIKE 'Slow_queries'")
-                    self._collect_scalar("mysqlQuestions",            "SHOW STATUS LIKE 'Questions'")
-                    self._collect_scalar("mysqlQueries",              "SHOW STATUS LIKE 'Queries'")
+                self._collect_scalar("mysqlCreatedTmpDiskTables", "SHOW /*!50002 GLOBAL */ STATUS LIKE 'Created_tmp_disk_tables'")
+                self._collect_scalar("mysqlSlowQueries",          "SHOW /*!50002 GLOBAL */ STATUS LIKE 'Slow_queries'")
+                self._collect_scalar("mysqlQuestions",            "SHOW /*!50002 GLOBAL */ STATUS LIKE 'Questions'")
+                self._collect_scalar("mysqlQueries",              "SHOW /*!50002 GLOBAL */ STATUS LIKE 'Queries'")
                 
                 self._collect_scalar("mysqlMaxUsedConnections", "SHOW STATUS LIKE 'Max_used_connections'")
                 self._collect_scalar("mysqlOpenFiles",          "SHOW STATUS LIKE 'Open_files'")
