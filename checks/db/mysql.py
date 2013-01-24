@@ -9,6 +9,7 @@ class MySql(Check):
         self.mysqlVersion = None
         self.db = None
         self.logger = logger
+        self.slowProcessThreshold = 5
 
         # Register metrics
         self.counter("mysqlConnections")
@@ -18,6 +19,8 @@ class MySql(Check):
         self.counter("mysqlSlowQueries")
         self.counter("mysqlQuestions")
         self.counter("mysqlQueries")
+        self.gauge("mysqlSlowProcessCount")
+        self.gauge("mysqlSlowProcessMax")
         self.gauge("mysqlTableLocksWaited")
         self.gauge("mysqlThreadsConnected")
         self.gauge("mysqlSecondsBehindMaster")
@@ -36,7 +39,11 @@ class MySql(Check):
                 cursor = self.db.cursor()
                 cursor.execute(query)
                 result = cursor.fetchone()
-                self.save_sample(metric, float(result[1]))
+                if ((result[0] is None) or (result[0] == 0)):
+                    self.logger.debug("Got here 1!")
+                    self.save_sample(metric, 0)
+                else:
+                    self.save_sample(metric, float(result[1]))
                 cursor.close()
                 del cursor
                 self.logger.debug("Collecting %s: done" % metric)
@@ -230,6 +237,10 @@ class MySql(Check):
                 self._collect_scalar("mysqlInnodbDataWrites",  "SHOW STATUS LIKE 'Innodb_data_writes'")
                 self._collect_scalar("mysqlInnodbOsLogFsyncs", "SHOW STATUS LIKE 'Innodb_os_log_fsyncs'")
     
+                self.logger.debug("Collect processlist stats")
+                self._collect_scalar("mysqlSlowProcessCount",  "SELECT COUNT(*) FROM information_schema.processlist WHERE command != 'Sleep' AND time > %d" % self.slowProcessThreshold)
+                self._collect_scalar("mysqlSlowProcessMax",    "SELECT MAX(time) FROM information_schema.processlist WHERE command != 'Sleep' AND time > %d" % self.slowProcessThreshold)
+                
                 self.logger.debug("Collect cpu stats")
                 self._collect_procfs()
     

@@ -67,6 +67,8 @@ AGENT_TRANSLATION = {
     'mysqlMaxUsedConnections'   : 'mysql.net.max_connections',
     'mysqlQueries'              : 'mysql.performance.queries',
     'mysqlQuestions'            : 'mysql.performance.questions',
+    'mysqlSlowProcessCount'     : 'mysql.performance.slow_process_count',
+    'mysqlSlowProcessMax'       : 'mysql.performance.slow_process_max',
     'mysqlOpenFiles'            : 'mysql.performance.open_files',
     'mysqlSlowQueries'          : 'mysql.performance.slow_queries',
     'mysqlTableLocksWaited'     : 'mysql.performance.table_locks_waited',
