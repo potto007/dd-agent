@@ -10,6 +10,7 @@ class MySql(Check):
         self.db = None
         self.logger = logger
         self.slowProcessThreshold = 5
+        self.replicationUser = 'replicate'
 
         # Register metrics
         self.counter("mysqlConnections")
@@ -238,8 +239,8 @@ class MySql(Check):
                 self._collect_scalar("mysqlInnodbOsLogFsyncs", "SHOW STATUS LIKE 'Innodb_os_log_fsyncs'")
     
                 self.logger.debug("Collect processlist stats")
-                self._collect_scalar("mysqlSlowProcessCount",  "SELECT COUNT(*) FROM information_schema.processlist WHERE command != 'Sleep' AND time > %d" % self.slowProcessThreshold)
-                self._collect_scalar("mysqlSlowProcessMax",    "SELECT MAX(time) FROM information_schema.processlist WHERE command != 'Sleep' AND time > %d" % self.slowProcessThreshold)
+                self._collect_scalar("mysqlSlowProcessCount",  "SELECT COUNT(*) FROM information_schema.processlist WHERE command != 'Sleep' AND user != '%s' AND time > %d" % (self.replicationUser, self.slowProcessThreshold))
+                self._collect_scalar("mysqlSlowProcessMax",    "SELECT MAX(time) FROM information_schema.processlist WHERE command != 'Sleep' AND user != '%s' AND time > %d" % (self.replicationUser, self.slowProcessThreshold))
                 
                 self.logger.debug("Collect cpu stats")
                 self._collect_procfs()
