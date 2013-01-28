@@ -205,6 +205,7 @@ class MySql(Check):
                                                   passwd=agentConfig['mysql_pass'])
                     else:
                         self.db = MySQLdb.connect(host=agentConfig['mysql_server'],
+                                                  port=int(agentConfig['mysql_port']),
                                                   user=agentConfig['mysql_user'],
                                                   passwd=agentConfig['mysql_pass'])
                     self.getVersion()
